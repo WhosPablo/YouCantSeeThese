@@ -1,31 +1,35 @@
 Parse.initialize("Xcat16hMq0jy4bEDtdzRQcDauxwTiu6Y7mN2s8By", "gtfBeoPKCkCGzbspbmfCVxrJ2dQjh7FQhxGZRI3c");
 
-var Site = Parse.Object.extend("Site");
 
-var data = [];
+loadChart = function(){
 
-var query = new Parse.Query(Site);
-query.descending("time");
-query.limit(10);
+    var Site = Parse.Object.extend("Site");
 
-query.find({
-    success: function (results) {
-        //alert("Successfully retrieved " + results.length + " scores.");
-        // Do something with the returned Parse.Object values
-        for (var i = 0; i < results.length; i++) {
-            var object = results[i];
-            var minDiff = object.get("timeSpent");
-            minDiff = Math.round(minDiff / 600)/100;
-            data.push([object.get("url"), minDiff]);
+    var data = [];
+
+    var query = new Parse.Query(Site);
+    query.descending("timeSpent");
+    query.limit(10);
+
+    query.find({
+        success: function (results) {
+            //alert("Successfully retrieved " + results.length + " scores.");
+            // Do something with the returned Parse.Object values
+            for (var i = 0; i < results.length; i++) {
+                var object = results[i];
+                var minDiff = object.get("timeSpent");
+                minDiff = Math.round(minDiff / 600)/100;
+                data.push([object.get("title"), minDiff]);
+                console.log(object.id + ' - ' + object.get('url'),object.get("timeSpent"));
+            }
             drawChart(data);
-            console.log(object.id + ' - ' + object.get('url'),object.get("timeSpent"));
-        }
 
-    },
-    error: function (error) {
-        console.log("Error: " + error.code + " " + error.message);
-    }
-});
+        },
+        error: function (error) {
+            console.log("Error: " + error.code + " " + error.message);
+        }
+    });
+}
 
 function drawChart (data ) {
     $('#container').highcharts({
@@ -81,6 +85,14 @@ function drawChart (data ) {
             }
         }]
     });
-};
+}
+
+document.addEventListener('focus', loadChart());
+
+
+loadChart();
+
+
+
 
 

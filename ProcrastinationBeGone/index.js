@@ -1,53 +1,7 @@
-Parse.initialize("Xcat16hMq0jy4bEDtdzRQcDauxwTiu6Y7mN2s8By", "gtfBeoPKCkCGzbspbmfCVxrJ2dQjh7FQhxGZRI3c");
+Parse.initialize("RLrGIdVcBOjo80GwB5fi3xi3lCZ0Qk2RpO9fXiGr", "Lmu4rEdndfn1ihx2vDNIISC9O1MrI9FRarzJGul3");
 
-var currUser = Parse.User.current()
-if (currUser) {
-    main();
-} else {
-    chrome.storage.sync.get(['userId', 'userPass'], function (result) {
-        if (result.userId) {
-            logIn(result.userId, result.userPass);
-        } else {
-            var userId = getRandomToken();
-            var userPass = getRandomToken();
-            chrome.storage.sync.set({userId: userId, userPass: userPass}, function () {
-                signUp(userId, userPass);
-            });
-        }
-
-        function logIn(userId, userPass) {
-            Parse.User.logIn(userId, userPass, {
-                success: function (user) {
-                    console.log("Log In Success");
-                    currUser = Parse.User.current();
-                    main();
-                },
-                error: function (pUser, error) {
-                    // The login failed. Check error to see why.
-                    console.log("Log In Error: " + error.code + " " + error.message);
-                }
-            });
-        }
-
-        function signUp(userId, userPass) {
-
-            var parseUser = new Parse.User();
-            parseUser.set("username", userId);
-            parseUser.set("password", userPass);
-            parseUser.signUp(null, {
-                success: function (user) {
-                    console.log("Sign Up Success");
-                    currUser = Parse.User.current();
-                    main();
-                },
-                error: function (pUser, error) {
-                    // Show the error message somewhere and let the user try again.
-                    console.log("Sign Up Error: " + error.code + " " + error.message);
-                }
-            });
-        }
-    });
-}
+var currUser = Parse.User.current();
+main();
 
 
 function main() {

@@ -19,6 +19,7 @@ if (currUser) {
             Parse.User.logIn(userId, userPass, {
                 success: function (user) {
                     console.log("Log In Success");
+                    currUser = Parse.User.current();
                     main();
                 },
                 error: function (pUser, error) {
@@ -36,6 +37,7 @@ if (currUser) {
             parseUser.signUp(null, {
                 success: function (user) {
                     console.log("Sign Up Success");
+                    currUser = Parse.User.current();
                     main();
                 },
                 error: function (pUser, error) {

@@ -28,9 +28,9 @@ function log(url, title){
 function updateUrl(url, title){
     parser.href = url;
 
-    var TestObject = Parse.Object.extend("TestObject");
+    var Site = Parse.Object.extend("Site");
 
-    var query = new Parse.Query(TestObject);
+    var query = new Parse.Query(Site);
 
     query.equalTo("url",parser.hostname );
 
@@ -45,9 +45,9 @@ function updateUrl(url, title){
                 object.set("time", minDiff+object.get("time"));
                 object.save();
             } else {
-                var testObject1 = new TestObject();
-                testObject1.save({
-                    url: parser.hostname, time: Date.now(),
+                var site1 = new Site();
+                site1.save({
+                    url: parser.hostname, time: 0,
                     title: title
                 }).then(function(object) {
                     console.log("yay! it worked", url, parser.hostname);

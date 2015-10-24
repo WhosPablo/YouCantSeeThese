@@ -1,6 +1,33 @@
 Parse.initialize("Xcat16hMq0jy4bEDtdzRQcDauxwTiu6Y7mN2s8By", "gtfBeoPKCkCGzbspbmfCVxrJ2dQjh7FQhxGZRI3c");
 
-$(function () {
+var Site = Parse.Object.extend("Site");
+
+var data = [];
+
+var query = new Parse.Query(Site);
+query.descending("time");
+query.limit(10);
+
+query.find({
+    success: function (results) {
+        //alert("Successfully retrieved " + results.length + " scores.");
+        // Do something with the returned Parse.Object values
+        for (var i = 0; i < results.length; i++) {
+            var object = results[i];
+            var minDiff = object.get("time");
+            minDiff = Math.round(minDiff / 600)/100;
+            data.push([object.get("url"), minDiff]);
+            drawChart(data);
+            console.log(object.id + ' - ' + object.get('url'),object.get("time"));
+        }
+
+    },
+    error: function (error) {
+        console.log("Error: " + error.code + " " + error.message);
+    }
+});
+
+function drawChart (data ) {
     $('#container').highcharts({
         credits: {
             enabled: false
@@ -12,10 +39,7 @@ $(function () {
             type: 'column'
         },
         title: {
-            text: 'World\'s largest cities per 2014'
-        },
-        subtitle: {
-            text: 'Source: <a href="http://en.wikipedia.org/wiki/List_of_cities_proper_by_population">Wikipedia</a>'
+            text: 'Time Spent on Sites'
         },
         xAxis: {
             type: 'category',
@@ -30,46 +54,26 @@ $(function () {
         yAxis: {
             min: 0,
             title: {
-                text: 'Population (millions)'
+                text: 'Time (minutes)'
             }
         },
         legend: {
             enabled: false
         },
         tooltip: {
-            pointFormat: 'Population in 2008: <b>{point.y:.1f} millions</b>'
+            pointFormat: 'Time spent: <b>{point.y:.1f} minutes</b>'
         },
         series: [{
-            name: 'Population',
-            data: [
-                ['Shanghai', 23.7],
-                ['Lagos', 16.1],
-                ['Instanbul', 14.2],
-                ['Karachi', 14.0],
-                ['Mumbai', 12.5],
-                ['Moscow', 12.1],
-                ['São Paulo', 11.8],
-                ['Beijing', 11.7],
-                ['Guangzhou', 11.1],
-                ['Delhi', 11.1],
-                ['Shenzhen', 10.5],
-                ['Seoul', 10.4],
-                ['Jakarta', 10.0],
-                ['Kinshasa', 9.3],
-                ['Tianjin', 9.3],
-                ['Tokyo', 9.0],
-                ['Cairo', 8.9],
-                ['Dhaka', 8.9],
-                ['Mexico City', 8.9],
-                ['Lima', 8.9]
-            ],
+            name: 'Time',
+            data: data,
             dataLabels: {
                 enabled: true,
-                rotation: -90,
-                color: '#FFFFFF',
+                rotation: 0,
+                color: '#000000',
                 align: 'right',
                 format: '{point.y:.1f}', // one decimal
-                y: 10, // 10 pixels down from the top
+                y: 0, // 10 pixels down from the top
+                x:-10,
                 style: {
                     fontSize: '13px',
                     fontFamily: 'Verdana, sans-serif'
@@ -77,6 +81,6 @@ $(function () {
             }
         }]
     });
-});
+};
 
 

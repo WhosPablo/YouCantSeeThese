@@ -38,16 +38,20 @@ function updateUrl(url, title){
         success: function(object) {
             if(object) {
                 console.log("Successfully retrieved " + object);
-                var minDiff = Date.now() - lastTime;
+                var minDiff = Date.now() - object.get("lastAccessed");
                 //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
 
-                console.log(minDiff+object.get("time"), object.get("time"))
-                object.set("time", minDiff+object.get("time"));
+                console.log(minDiff+object.get("timeSpent"), object.get("timeSpent"));
+                object.set("time", minDiff+object.get("timeSpent"));
                 object.save();
+                lastUrl = url;
+                lastTime = Date.now();
             } else {
                 var site1 = new Site();
                 site1.save({
-                    url: parser.hostname, time: 0,
+                    url: parser.hostname,
+                    timeSpent: 0,
+                    lastAccessed: Date.now(),
                     title: title
                 }).then(function(object) {
                     console.log("yay! it worked", url, parser.hostname);
@@ -60,8 +64,7 @@ function updateUrl(url, title){
         }
     });
 
-    lastUrl = url;
-    lastTime = Date.now();
+
 }
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {

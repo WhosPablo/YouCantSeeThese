@@ -75,8 +75,26 @@ function log(url, title){
     var hostname = parser.hostname;
     if(lastUrl !== url){
         updateUrl(hostname, title)
-    }
-
+	}
+	var blockedSite = Parse.Object.extend("BlockedSite");
+	var query = new Parse.Query(blockedSite);
+	query.find({
+		success: function (results) {
+			for (var i = 0; i < results.length; i++) {
+				var object = results[i];
+				if (object.get("hostname")=== hostname) {
+					alert("you're supposed to be productive!!");
+					console.log("matched ", hostname);
+		
+				}else {
+					console.log("didn't match ", hostname, object.get("hostname"));
+				}
+			}
+		},
+		error: function (error){
+			console.log("Error: " + error.code + " " + error.message);
+		}
+	});
 
 }
 

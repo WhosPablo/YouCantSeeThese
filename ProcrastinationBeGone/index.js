@@ -6,6 +6,7 @@ main();
 
 function main() {
     var username = currUser.get('username');
+
     function loadChart() {
 
         var data = [];
@@ -18,6 +19,7 @@ function main() {
 
         query.find({
             success: function (results) {
+                $('#siteGroup').empty();
                 //alert("Successfully retrieved " + results.length + " scores.");
                 // Do something with the returned Parse.Object values
                 for (var i = 0; i < results.length; i++) {
@@ -26,6 +28,22 @@ function main() {
                     var minDiff = object.get("timeSpent");
                     minDiff = Math.round(minDiff / 600) / 100;
                     data.push([object.get("title"), minDiff]);
+                    $('#siteGroup').append(
+                        "<li class='list-group-item clearfix' style='background:#2c3e50; color:#FFFFFF'><b>" +
+                        (object.get("title") || object.get("url") ) +
+                        "</b><span class='pull-right'>" +
+                        "<div class='onoffswitch'>" +
+                            "<input type='checkbox' name='onoffswitch' class='onoffswitch-checkbox' id="+
+                                object.id+
+                            ">" +
+                            "<label class='onoffswitch-label' for="+
+                                object.id+">" +
+                            "<span class='onoffswitch-inner'></span>" +
+                            "<span class='onoffswitch-switch'></span>" +
+                            "</label>" +
+                        "</div>" +
+                        "</span>" +
+                        "</li>");
                     console.log(object.id + ' - ' + object.get('url'), object.get("timeSpent"));
                 }
                 drawChart(data);
@@ -53,7 +71,7 @@ function main() {
                 animation: {
                     duration: 10
                 },
-                backgroundColor:'transparent'
+                backgroundColor: 'transparent'
             },
             title: {
                 style: {
@@ -73,7 +91,7 @@ function main() {
                 }
             },
             yAxis: {
-                labels:{
+                labels: {
                     style: {
                         color: '#FFFFFF'
                     }
@@ -100,7 +118,7 @@ function main() {
                     rotation: 0,
                     color: '#FFFFFF',
                     align: 'right',
-                    format: '{point.y:.1f}', // one decimal
+                    format: '{point.y:.11f}', // two decimals
                     y: 0, // 10 pixels down from the top
                     x: -5,
                     style: {
@@ -108,10 +126,11 @@ function main() {
                         fontFamily: 'Verdana, sans-serif'
                     }
                 },
-                color:'#c0392b'
+                color: '#c0392b'
             }]
         });
     }
+
     window.addEventListener('focus', function () {
         loadChart();
     });

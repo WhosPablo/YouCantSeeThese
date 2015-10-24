@@ -1,5 +1,7 @@
 var prefs = {};
 var parser = document.createElement('a');
+var lastUrl = null;
+var lastTime = null;
 
 Parse.initialize("Xcat16hMq0jy4bEDtdzRQcDauxwTiu6Y7mN2s8By", "gtfBeoPKCkCGzbspbmfCVxrJ2dQjh7FQhxGZRI3c");
 
@@ -13,21 +15,48 @@ chrome.storage.onChanged.addListener(function(changes) {
 });
 
 function log(url, title){
-    var TestObject = Parse.Object.extend("TestObject");
+    if(lastUrl !== url){
+        parser.href = url;
 
-    var query = new Parse.Query(TestObject);
+        var TestObject = Parse.Object.extend("TestObject");
+
+        var query = new Parse.Query(TestObject);
+
+        query.equalTo("url",parser.hostname );
+
+        query.first({
+            success: function(object) {
+                if(object) {
+                    console.log("Successfully retrieved " + object);
+                    var minDiff = Date.now() - lastTime;
+                    //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
+                    object.set("time", minDiff);
+                    object.save();
+                } else {
+                    var testObject1 = new TestObject();
+                    testObject1.save({
+                        url: parser.hostname, time: Date.now(),
+                        title: title
+                    }).then(function(object) {
+                        console.log("yay! it worked", url, parser.hostname);
+                    });
+                }
+
+            },
+            error: function(error) {
+                console.log("Error: " + error.code + " " + error.message);
+            }
+        });
 
 
-    var testObject1 = new TestObject();
-    parser.href = url;
+
+    }
+
+    lastUrl = url;
+    lastTime = Date.now();
 
 
-    testObject1.save({
-        url: parser.hostname, time: Date.now(),
-        title: title
-    }).then(function(object) {
-      console.log("yay! it worked", url, parser.hostname);
-    });
+
 }
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {

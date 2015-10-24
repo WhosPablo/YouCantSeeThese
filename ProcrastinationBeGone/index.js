@@ -40,7 +40,10 @@ function drawChart (data ) {
             enabled: false
         },
         chart: {
-            type: 'column'
+            type: 'column',
+            animation: {
+                duration: 500
+            }
         },
         title: {
             text: 'Time Spent on Sites'
@@ -77,7 +80,7 @@ function drawChart (data ) {
                 align: 'right',
                 format: '{point.y:.1f}', // one decimal
                 y: 0, // 10 pixels down from the top
-                x:-10,
+                x:-5,
                 style: {
                     fontSize: '13px',
                     fontFamily: 'Verdana, sans-serif'
@@ -87,10 +90,12 @@ function drawChart (data ) {
     });
 }
 
-document.addEventListener('focus', loadChart());
+window.addEventListener('focus', function(){
+   loadChart();
+});
 
 
-loadChart();
+//loadChart();
 
 
 

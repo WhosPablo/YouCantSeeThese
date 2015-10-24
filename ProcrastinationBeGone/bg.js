@@ -1,38 +1,93 @@
-var prefs = {};
+var user = {};
 var parser = document.createElement('a');
 var lastUrl = null;
 var lastTime = null;
 
 Parse.initialize("Xcat16hMq0jy4bEDtdzRQcDauxwTiu6Y7mN2s8By", "gtfBeoPKCkCGzbspbmfCVxrJ2dQjh7FQhxGZRI3c");
 
+function getRandomToken() {
+    // E.g. 8 * 32 = 256 bits token
+    var randomPool = new Uint8Array(32);
+    crypto.getRandomValues(randomPool);
+    var hex = '';
+    for (var i = 0; i < randomPool.length; ++i) {
+        hex += randomPool[i].toString(16);
+    }
+    // E.g. db18458e2782b2b77e36769c569e263a53885a9944dd0a861e5064eac16f1a
+    return hex;
+}
+
 chrome.browserAction.onClicked.addListener(function(activeTab){
-    var newWindow = window.open("index.html");
+    window.open("index.html");
 });
 
-chrome.storage.local.get({callback: 'http://localhost:8080', key: 'chrome'}, function(o) { prefs = o; });
+//chrome.storage.sync.get(['userId', 'userPass'], function(o) {
+//    user = o;
+//    if(user.userId){
+//        logIn(user.userId,user.userPass);
+//    } else {
+//        var userId = getRandomToken();
+//        var userPass = getRandomToken();
+//
+//
+//        chrome.storage.sync.set({userId: userId, userPass:userPass}, function() {
+//            signUp(userId, userPass);
+//        });
+//    }
+//
+//    function logIn(userId, userPass) {
+//        Parse.User.logIn(userId, userPass, {
+//            success: function(user) {
+//                console.log("Log In Success");
+//            },
+//            error: function(pUser, error) {
+//                // The login failed. Check error to see why.
+//                console.log("Log In Error: " + error.code + " " + error.message);
+//            }
+//        });
+//    }
+//
+//    function signUp(userId, userPass) {
+//
+//        var parseUser = new Parse.User();
+//        parseUser.set("username", userId);
+//        parseUser.set("password", userPass);
+//        parseUser.signUp(null, {
+//            success: function(user) {
+//                console.log("Sign Up Success");
+//            },
+//            error: function(pUser, error) {
+//                // Show the error message somewhere and let the user try again.
+//                console.log("Sign Up Error: " + error.code + " " + error.message);
+//            }
+//        });
+//    }
+//});
 
 chrome.storage.onChanged.addListener(function(changes) {
-    for (key in changes) {
-        prefs[key] = changes[key].newValue;
-    }
+
+    user['userId'] = changes['userId'].newValue;
+    user['userPass'] = changes['userPass'].newValue;
 });
 
 function log(url, title){
+    parser.href = url;
+    var hostname = parser.hostname;
     if(lastUrl !== url){
-        updateUrl(url, title)
+        updateUrl(hostname, title)
     }
 
 
 }
 
 function updateUrl(url, title){
-    parser.href = url;
+
 
     var Site = Parse.Object.extend("Site");
 
     var query = new Parse.Query(Site);
 
-    query.equalTo("url",parser.hostname );
+    query.equalTo("url",url );
 
     query.first({
         success: function(object) {
@@ -49,12 +104,12 @@ function updateUrl(url, title){
             } else {
                 var site1 = new Site();
                 site1.save({
-                    url: parser.hostname,
+                    url: url,
                     timeSpent: 0,
                     lastAccessed: Date.now(),
                     title: title
                 }).then(function(object) {
-                    console.log("yay! it worked", url, parser.hostname);
+                    console.log("yay! it worked", url);
                 });
             }
 

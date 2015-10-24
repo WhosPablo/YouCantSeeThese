@@ -5,6 +5,9 @@ var lastTime = null;
 
 Parse.initialize("Xcat16hMq0jy4bEDtdzRQcDauxwTiu6Y7mN2s8By", "gtfBeoPKCkCGzbspbmfCVxrJ2dQjh7FQhxGZRI3c");
 
+chrome.browserAction.onClicked.addListener(function(activeTab){
+    var newWindow = window.open("index.html");
+});
 
 chrome.storage.local.get({callback: 'http://localhost:8080', key: 'chrome'}, function(o) { prefs = o; });
 

@@ -1,4 +1,5 @@
 var prefs = {};
+var parser = document.createElement('a');
 
 Parse.initialize("Xcat16hMq0jy4bEDtdzRQcDauxwTiu6Y7mN2s8By", "gtfBeoPKCkCGzbspbmfCVxrJ2dQjh7FQhxGZRI3c");
 
@@ -11,16 +12,21 @@ chrome.storage.onChanged.addListener(function(changes) {
     }
 });
 
-function log(url, title, favicon){
-
+function log(url, title){
     var TestObject = Parse.Object.extend("TestObject");
+
+    var query = new Parse.Query(TestObject);
+
+
     var testObject1 = new TestObject();
-    url = purl(url);
+    parser.href = url;
+
+
     testObject1.save({
-        url: url.host, time: Date.now(),
+        url: parser.hostname, time: Date.now(),
         title: title
     }).then(function(object) {
-      console.log("yay! it worked");
+      console.log("yay! it worked", url, parser.hostname);
     });
 }
 
@@ -29,7 +35,7 @@ chrome.tabs.onActivated.addListener(function (activeInfo) {
         if (tab.status === "complete" && tab.active) {
             chrome.windows.get(tab.windowId, {populate: false}, function(window) {
                 if (window.focused) {
-                    log(tab.url, tab.title, tab.favIconUrl || null);
+                    log(tab.url, tab.title || null);
                 }
             });
         }
@@ -40,7 +46,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     if (changeInfo.status === "complete" && tab.active) {
         chrome.windows.get(tab.windowId, {populate: false}, function(window) {
             if (window.focused) {
-                log(tab.url, tab.title, tab.favIconUrl || null);
+                log(tab.url, tab.title || null);
             }
         });
     }
@@ -54,7 +60,7 @@ chrome.windows.onFocusChanged.addListener(function (windowId) {
             if (window.focused) {
                 chrome.tabs.query({active: true, windowId: windowId}, function (tabs) {
                     if (tabs[0].status === "complete") {
-                        log(tabs[0].url, tabs[0].title, tabs[0].favIconUrl || null);
+                        log(tabs[0].url, tabs[0].title || null);
                     }
                 });
             }

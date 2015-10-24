@@ -5,9 +5,7 @@ main();
 
 
 function main() {
-
     var username = currUser.get('username');
-
     function loadChart() {
 
         var data = [];
@@ -48,12 +46,19 @@ function main() {
                 enabled: false
             },
             chart: {
+                style: {
+                    color: '#FFFFFF'
+                },
                 type: 'column',
                 animation: {
-                    duration: 500
-                }
+                    duration: 10
+                },
+                backgroundColor:'transparent'
             },
             title: {
+                style: {
+                    color: '#FFFFFF'
+                },
                 text: 'Time Spent on Sites'
             },
             xAxis: {
@@ -62,14 +67,23 @@ function main() {
                     rotation: -45,
                     style: {
                         fontSize: '13px',
-                        fontFamily: 'Verdana, sans-serif'
+                        fontFamily: 'Verdana, sans-serif',
+                        color: '#FFFFFF'
                     }
                 }
             },
             yAxis: {
+                labels:{
+                    style: {
+                        color: '#FFFFFF'
+                    }
+                },
                 min: 0,
                 title: {
-                    text: 'Time (minutes)'
+                    text: 'Time (minutes)',
+                    style: {
+                        color: '#FFFFFF'
+                    }
                 }
             },
             legend: {
@@ -84,7 +98,7 @@ function main() {
                 dataLabels: {
                     enabled: true,
                     rotation: 0,
-                    color: '#000000',
+                    color: '#FFFFFF',
                     align: 'right',
                     format: '{point.y:.1f}', // one decimal
                     y: 0, // 10 pixels down from the top
@@ -93,14 +107,15 @@ function main() {
                         fontSize: '13px',
                         fontFamily: 'Verdana, sans-serif'
                     }
-                }
+                },
+                color:'#c0392b'
             }]
         });
     }
-
     window.addEventListener('focus', function () {
         loadChart();
     });
+    loadChart();
 }
 
 

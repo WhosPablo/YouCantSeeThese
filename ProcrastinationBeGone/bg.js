@@ -142,7 +142,7 @@ function main() {
             success: function (object) {
                 if (object) {
                     console.log("Successfully retrieved " + object);
-                    var minDiff = Date.now() - object.get("lastAccessed");
+                    var minDiff = Date.now() - lastTime;
                     //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
 
                     console.log(minDiff + object.get("timeSpent"), object.get("timeSpent"));
@@ -160,6 +160,8 @@ function main() {
                         title: title
                     }).then(function (object) {
                         console.log("yay! it worked", username, url);
+                        lastUrl = url;
+                        lastTime = Date.now();
                     });
                 }
 

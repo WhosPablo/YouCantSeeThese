@@ -16,47 +16,49 @@ chrome.storage.onChanged.addListener(function(changes) {
 
 function log(url, title){
     if(lastUrl !== url){
-        parser.href = url;
-
-        var TestObject = Parse.Object.extend("TestObject");
-
-        var query = new Parse.Query(TestObject);
-
-        query.equalTo("url",parser.hostname );
-
-        query.first({
-            success: function(object) {
-                if(object) {
-                    console.log("Successfully retrieved " + object);
-                    var minDiff = Date.now() - lastTime;
-                    //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
-                    object.set("time", minDiff);
-                    object.save();
-                } else {
-                    var testObject1 = new TestObject();
-                    testObject1.save({
-                        url: parser.hostname, time: Date.now(),
-                        title: title
-                    }).then(function(object) {
-                        console.log("yay! it worked", url, parser.hostname);
-                    });
-                }
-
-            },
-            error: function(error) {
-                console.log("Error: " + error.code + " " + error.message);
-            }
-        });
-
-
-
+        updateUrl(url, title)
     }
+
+
+}
+
+function updateUrl(url, title){
+    parser.href = url;
+
+    var TestObject = Parse.Object.extend("TestObject");
+
+    var query = new Parse.Query(TestObject);
+
+    query.equalTo("url",parser.hostname );
+
+    query.first({
+        success: function(object) {
+            if(object) {
+                console.log("Successfully retrieved " + object);
+                var minDiff = Date.now() - lastTime;
+                //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
+
+                console.log(minDiff+object.get("time"), object.get("time"))
+                object.set("time", minDiff+object.get("time"));
+                object.save();
+            } else {
+                var testObject1 = new TestObject();
+                testObject1.save({
+                    url: parser.hostname, time: Date.now(),
+                    title: title
+                }).then(function(object) {
+                    console.log("yay! it worked", url, parser.hostname);
+                });
+            }
+
+        },
+        error: function(error) {
+            console.log("Error: " + error.code + " " + error.message);
+        }
+    });
 
     lastUrl = url;
     lastTime = Date.now();
-
-
-
 }
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {

@@ -42,7 +42,7 @@ function updateUrl(url, title){
                 //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
 
                 console.log(minDiff+object.get("timeSpent"), object.get("timeSpent"));
-                object.set("time", minDiff+object.get("timeSpent"));
+                object.set("timeSpent", minDiff+object.get("timeSpent"));
                 object.save();
                 lastUrl = url;
                 lastTime = Date.now();

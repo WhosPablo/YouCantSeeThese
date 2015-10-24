@@ -14,11 +14,11 @@ query.find({
         // Do something with the returned Parse.Object values
         for (var i = 0; i < results.length; i++) {
             var object = results[i];
-            var minDiff = object.get("time");
+            var minDiff = object.get("timeSpent");
             minDiff = Math.round(minDiff / 600)/100;
             data.push([object.get("url"), minDiff]);
             drawChart(data);
-            console.log(object.id + ' - ' + object.get('url'),object.get("time"));
+            console.log(object.id + ' - ' + object.get('url'),object.get("timeSpent"));
         }
 
     },

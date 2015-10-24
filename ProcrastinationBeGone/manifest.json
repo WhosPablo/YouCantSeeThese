@@ -11,7 +11,7 @@
 
     "background": {
 
-        "scripts": ["parse-1.6.7.min.js","bg.js"]
+        "scripts": ["purl.js","parse-1.6.7.min.js","bg.js"]
     },
 
     "permissions": [

@@ -1,11 +1,7 @@
 var prefs = {};
 
 Parse.initialize("Xcat16hMq0jy4bEDtdzRQcDauxwTiu6Y7mN2s8By", "gtfBeoPKCkCGzbspbmfCVxrJ2dQjh7FQhxGZRI3c");
-var TestObject = Parse.Object.extend("TestObject");
-var testObject = new TestObject();
-testObject.save({foo: "bar2"}).then(function(object) {
-  alert("yay! it worked");
-});
+
 
 chrome.storage.local.get({callback: 'http://localhost:8080', key: 'chrome'}, function(o) { prefs = o; });
 
@@ -17,23 +13,15 @@ chrome.storage.onChanged.addListener(function(changes) {
 
 function log(url, title, favicon){
 
-    var TestObject1 = Parse.Object.extend("TestObject");
+    var TestObject = Parse.Object.extend("TestObject");
     var testObject1 = new TestObject();
+    url = purl(url);
     testObject1.save({
-        url: url, time: Date.now(),
+        url: url.host, time: Date.now(),
         title: title
     }).then(function(object) {
-      alert("yay! it worked");
+      console.log("yay! it worked");
     });
-
-    // var data = JSON.stringify({
-    //     url: url, time: Date.now(),
-    //     title: title, key: prefs.key,
-    //     favicon: favicon
-    // });
-    // var xhr = new XMLHttpRequest();
-    // xhr.open("POST", prefs.callback);
-    // xhr.send(data);
 }
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {

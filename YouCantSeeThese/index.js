@@ -37,7 +37,7 @@ $(function(){
 
                     var minDiff = object.get("timeSpent");
                     minDiff = Math.round(minDiff / 600) / 100;
-                    data.push([object.get("title"), minDiff]);
+                    data.push([object.get("hostname"), minDiff]);
                 }
 
                 drawChart(data);
@@ -186,7 +186,7 @@ $(function(){
         $('#siteGroup').append(
             "<li class='list-group-item clearfix' style='background:#2980b9; color:#FFFFFF'>"+
             "<span>"+
-            "<b>" + object.get("title") + "</b>" + " &nbsp;  -  &nbsp; "+object.get("hostname")+
+            "<b>" + object.get("hostname") + "</b>" + " &nbsp;  -  &nbsp; "+object.get("title")+
             "</span>"+
             "<span class='pull-right'>" +
             "<div class='onoffswitch'>" +

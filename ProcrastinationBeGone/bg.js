@@ -98,7 +98,7 @@ function main() {
 
     var username = currUser.get('username');
 
-    function log(url, title) {
+    function log(url, title, tab) {
         parser.href = url;
         var hostname = parser.hostname;
         if (lastUrl !== url) {
@@ -112,7 +112,8 @@ function main() {
                 for (var i = 0; i < results.length; i++) {
                     var object = results[i];
                     if (object.get("hostname") === hostname) {
-                        alert("you're supposed to be productive!!");
+                        chrome.tabs.update(tab.id, {url: "redirect.html"});
+						//alert("You're supposed to be producetive!!");
                         console.log("matched ", hostname);
 
                     } else {
@@ -179,7 +180,7 @@ function main() {
             if (tab.status === "complete" && tab.active) {
                 chrome.windows.get(tab.windowId, {populate: false}, function (window) {
                     if (window.focused) {
-                        log(tab.url, tab.title || null);
+                        log(tab.url, tab.title || null, tab);
                     }
                 });
             }
@@ -190,7 +191,7 @@ function main() {
         if (changeInfo.status === "complete" && tab.active) {
             chrome.windows.get(tab.windowId, {populate: false}, function (window) {
                 if (window.focused) {
-                    log(tab.url, tab.title || null);
+                    log(tab.url, tab.title || null, tab);
                 }
             });
         }
@@ -204,7 +205,7 @@ function main() {
                 if (window.focused) {
                     chrome.tabs.query({active: true, windowId: windowId}, function (tabs) {
                         if (tabs[0].status === "complete") {
-                            log(tabs[0].url, tabs[0].title || null);
+                            log(tabs[0].url, tabs[0].title || null, tabs[0]);
                         }
                     });
                 }

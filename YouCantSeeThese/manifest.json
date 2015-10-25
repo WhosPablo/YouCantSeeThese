@@ -1,10 +1,10 @@
 {
-  "name": "Procrastination Be Gone",
+  "name": "You Can't See These",
   "version": "0.1",
-  "description": "Spongebob will help you avoid procrastination.",
+  "description": "An ol' friend will help you avoid procrastination.",
 
   "browser_action": {
-    "default_icon": "icon.png"
+    "default_icon": "iconNew.png"
   },
 
   "manifest_version": 2,

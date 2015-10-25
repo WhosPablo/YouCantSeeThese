@@ -1,4 +1,4 @@
-# Procrastination Be Gone
+# You Can't See These
 
 A simple chrome extension that shows you the top ten sites you've been spending the most time on and lets you block those 
 pesky distraction filled sites that wont let you move on with your project/life/studies. 

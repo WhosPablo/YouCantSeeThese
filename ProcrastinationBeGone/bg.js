@@ -108,7 +108,7 @@ function main() {
             var hostname = parser.hostname;
             var newTabTitle = "New Tab";
             var pBGTitle = "Procrastination Be Gone";
-            if (lastUrl !== url && title != newTabTitle && title != pBGTitle && title != null) {
+            if (lastUrl !== url && title !== newTabTitle && title !== pBGTitle && title !== null) {
                 updateUrl(hostname, title)
             }
 

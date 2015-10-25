@@ -1,11 +1,12 @@
 Parse.initialize("RLrGIdVcBOjo80GwB5fi3xi3lCZ0Qk2RpO9fXiGr", "Lmu4rEdndfn1ihx2vDNIISC9O1MrI9FRarzJGul3");
 
 var parser = document.createElement('a');
-var lastUrl = null;
+var lastHostname = null;
+var lastTitle = null;
 var lastTime = Date.now();
 var go = true;
 
-chrome.browserAction.onClicked.addListener(function (activeTab) {
+chrome.browserAction.onClicked.addListener(function () {
     window.open("index.html");
 });
 
@@ -26,7 +27,7 @@ function handleParseError(err, userId, userPass) {
         case Parse.Error.INVALID_SESSION_TOKEN:
         {
             Parse.User.logOut().then(
-                function (results) {
+                function () {
                     logIn(userId, userPass);
                 }
             );
@@ -48,7 +49,7 @@ function handleParseError(err, userId, userPass) {
 }
 function logIn(userId, userPass) {
     Parse.User.logIn(userId, userPass, {
-        success: function (user) {
+        success: function () {
             console.log("Log In Success");
             currUser = Parse.User.current();
             main();
@@ -67,7 +68,7 @@ function signUp(userId, userPass) {
     parseUser.set("username", userId);
     parseUser.set("password", userPass);
     parseUser.signUp(null, {
-        success: function (user) {
+        success: function () {
             console.log("Sign Up Success");
             currUser = Parse.User.current();
             main();
@@ -107,8 +108,13 @@ function main() {
             var hostname = parser.hostname;
             var newTabTitle = "New Tab";
             var pBGTitle = "Procrastination Be Gone";
-            if (lastUrl !== url && title !== newTabTitle && title !== pBGTitle && title !== null) {
-                updateUrl(hostname, title)
+            if (hostname !== lastHostname) {
+                if(lastTitle !== newTabTitle && lastTitle !== pBGTitle && lastTitle !== null){
+                    updateUrl(lastHostname, lastTitle, Date.now()- lastTime);
+                }
+                lastTitle = title;
+                lastHostname = hostname;
+                lastTime = Date.now();
             }
 
             checkIfBlocked(hostname, tab);
@@ -126,7 +132,6 @@ function main() {
                     var object = results[i];
                     if (object.get("hostname") === hostname) {
                         chrome.tabs.update(tab.id, {url: "redirect.html"});
-						//alert("You're supposed to be producetive!!");
                         console.log("matched ", hostname);
 
                     } else {
@@ -143,44 +148,29 @@ function main() {
 
     }
 
-    function updateUrl(hostname, title) {
+    function updateUrl(hostname, title, timeSpent) {
         var Site = Parse.Object.extend("Site");
 
         var query = new Parse.Query(Site);
         query.equalTo("user", username);
         query.equalTo("hostname", hostname);
-        query.find({
-            success: function (objects) {
-                if (objects) {
-                    for(var i =0; i< objects.length; i++){
-                        if(i=0){
-                            var object = objects[i];
-                            console.log("Successfully retrieved " + object);
-                            var minDiff = Date.now() - lastTime;
-                            //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
-
-                            console.log(minDiff + object.get("timeSpent"), object.get("timeSpent"));
-                            object.set("timeSpent", minDiff + object.get("timeSpent"));
-                            object.set("title", title);
-                            object.save();
-                            lastUrl = hostname;
-                            lastTime = Date.now();
-                        } else {
-                            objects[i].destroy();
-                        }
-                    }
+        query.first({
+            success: function (object) {
+                if (object) {
+                    object.set("timeSpent", timeSpent + object.get("timeSpent"));
+                    object.set("title", title);
+                    console.log("Saving object ", title, hostname,timeSpent);
+                    object.save();
                 } else {
                     var site1 = new Site();
                     site1.save({
                         user: username,
                         hostname: hostname,
-                        timeSpent: 0,
-                        lastAccessed: Date.now(),
+                        timeSpent: timeSpent,
                         title: title
                     }).then(function (object) {
-                        console.log("yay! it worked", username, hostname);
-                        lastUrl = hostname;
-                        lastTime = Date.now();
+                        console.log("New object", title, hostname,timeSpent );
+
                     });
                 }
 

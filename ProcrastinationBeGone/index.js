@@ -4,8 +4,6 @@ var currUser = Parse.User.current();
 
 main();
 
-
-
 function main() {
     var username = currUser.get('username');
     var topTenQuery;
@@ -14,35 +12,30 @@ function main() {
     var topTenNotBlocked;
 
 
-
-
     function findTopTenSitesNotBlocked() {
 
         var Site = Parse.Object.extend("Site");
         topTenQuery = new Parse.Query(Site);
         topTenQuery.equalTo('user', username);
         topTenQuery.doesNotMatchKeyInQuery('hostname', 'hostname', blockedSitesQuery);
-        topTenQuery.limit(10);
         topTenQuery.descending("timeSpent");
+        topTenQuery.limit(10);
 
         topTenQuery.find({
             success: function (results) {
                 var data = [];
                 topTenNotBlocked = {};
                 for (var i = 0; i < results.length; i++) {
-
                     var object = results[i];
                     topTenNotBlocked[object.id] = object;
-                    //console.log(object.id + ' - ' + object.get('hostname'), object.get("timeSpent"));
 
                     var minDiff = object.get("timeSpent");
                     minDiff = Math.round(minDiff / 600) / 100;
                     data.push([object.get("title"), minDiff]);
-
-                    addSiteToList(object, false);
                 }
+
                 drawChart(data);
-                addListeners();
+                updateList();
 
 
             },
@@ -54,20 +47,15 @@ function main() {
 
     function findBlockedSites() {
 
-
         var BlockedSite = Parse.Object.extend("BlockedSite");
         blockedSitesQuery = new Parse.Query(BlockedSite);
         blockedSitesQuery.equalTo('user', username);
         blockedSitesQuery.find({
             success: function (results) {
-                $('#siteGroup').empty();
                 blockedSites = {};
-
                 for (var i = 0; i < results.length; i++) {
                     var object = results[i];
                     blockedSites[object.id] = object;
-                    console.log("blocked site" + object.id + ' - ' + object.get('hostname'));
-                    addSiteToList(object, true);
                 }
 
                 findTopTenSitesNotBlocked();
@@ -78,34 +66,6 @@ function main() {
         });
 
     }
-
-    function addSiteToList(object, blocked) {
-        var checked = "";
-        if (blocked){
-            checked = "checked";
-        }
-
-        $('#siteGroup').append(
-            "<li class='list-group-item clearfix' style='background:#2980b9; color:#FFFFFF'>" +
-            "<b>" + object.get("title") + "</b>" +
-                "<span class='pull-right'>" +
-                "<div class='onoffswitch'>" +
-                "<input type='checkbox' name='onoffswitch' class='onoffswitch-checkbox' "+ checked+
-                " id= " + object.id +">" +
-                "<label class='onoffswitch-label' for=" +
-                object.id + ">" +
-                "<span class='onoffswitch-inner'></span>" +
-                "<span class='onoffswitch-switch'></span>" +
-                "</label>" +
-                "</div>" +
-                "</span>" +
-                "</li>"
-            );
-
-
-    }
-
-
 
 
     function drawChart(data) {
@@ -193,6 +153,50 @@ function main() {
         });
     }
 
+    function updateList(){
+        $('#siteGroup').empty();
+        for (var key in blockedSites) {
+            if (blockedSites.hasOwnProperty(key)) {
+                addSiteToList(blockedSites[key], true)
+            }
+        }
+
+        for (var key in topTenNotBlocked) {
+            if (topTenNotBlocked.hasOwnProperty(key)) {
+                addSiteToList(topTenNotBlocked[key], false)
+            }
+        }
+
+        addListeners();
+
+    }
+
+    function addSiteToList(object, blocked) {
+        var checked = "";
+        if (blocked){
+            checked = "checked";
+        }
+
+        $('#siteGroup').append(
+            "<li class='list-group-item clearfix' style='background:#2980b9; color:#FFFFFF'>" +
+            "<b>" + object.get("title") + "</b>" +
+            "<span class='pull-right'>" +
+            "<div class='onoffswitch'>" +
+            "<input type='checkbox' name='onoffswitch' class='onoffswitch-checkbox' "+ checked+
+            " id= " + object.id +">" +
+            "<label class='onoffswitch-label' for=" +
+            object.id + ">" +
+            "<span class='onoffswitch-inner'></span>" +
+            "<span class='onoffswitch-switch'></span>" +
+            "</label>" +
+            "</div>" +
+            "</span>" +
+            "</li>"
+        );
+
+
+    }
+
     function addListeners(){
         $("input[type='checkbox']").click(function() {
             var BlockedSite = Parse.Object.extend("BlockedSite");
@@ -214,7 +218,7 @@ function main() {
                                     console.log("yay! it blocked",siteObject.get('hostname'));
                                     delete topTenNotBlocked[siteObject.id];
                                     blockedSites[siteObject.id]= siteObject;
-                                    //findBlockedSites();
+
 
                                 });
                             }
@@ -237,7 +241,6 @@ function main() {
 
                                 var object = results[i];
                                 object.destroy().then( function (object){
-                                        //findBlockedSites();
                                         console.log("deleting"+ object.id+ object.get("hostname"));
                                         delete blockedSites[siteObject.id];
                                         topTenNotBlocked[siteObject.id]= siteObject;
@@ -283,7 +286,6 @@ function main() {
         });
         $("#refresh").click(function () {
 
-
             findBlockedSites();
 
         });
@@ -293,7 +295,6 @@ function main() {
     window.addEventListener('focus', function () {
         findBlockedSites();
     });
-    findBlockedSites();
 }
 
 

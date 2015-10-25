@@ -5,4 +5,5 @@ pesky distraction filled sites that wont let you move on with your project/life/
 
 It enlists the help of a good ol' friend...
 
-Add to chrome and click on the extension icon in the top right. It'll open up a tab with all you need to get your life together.
+Add to chrome and click on the extension icon in the top right. It'll open up a tab with all you need to get your life back
+on track.

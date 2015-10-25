@@ -18,8 +18,7 @@
     "tabs",
     "storage",
     "activeTab",
-    "https://ajax.googleapis.com/",
-    "http://code.highcharts.com/"
+    "https://ajax.googleapis.com/"
   ],
 
   "options_page": "options.html"

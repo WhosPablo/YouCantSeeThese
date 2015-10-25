@@ -6,47 +6,20 @@ main();
 
 function main() {
     var username = currUser.get('username');
+    var topTenQuery;
+    var blockedSitesQuery;
+    var blockedSites;
+    var topTenNotBlocked;
 
-    function loadChart() {
-
-        var data = [];
-
-        var Site = Parse.Object.extend("Site");
+    function clear() {
         var query = new Parse.Query(Site);
-        query.equalTo('user', username);
-        query.descending("timeSpent");
-        query.limit(10);
-
+        query.equalTo("user", username);
         query.find({
             success: function (results) {
-                $('#siteGroup').empty();
-                //alert("Successfully retrieved " + results.length + " scores.");
-                // Do something with the returned Parse.Object values
                 for (var i = 0; i < results.length; i++) {
-
                     var object = results[i];
-                    var minDiff = object.get("timeSpent");
-                    minDiff = Math.round(minDiff / 600) / 100;
-                    data.push([object.get("title"), minDiff]);
-                    $('#siteGroup').append(
-                        "<li class='list-group-item clearfix' style='background:#2c3e50; color:#FFFFFF'><b>" +
-                        (object.get("title") || object.get("url") ) +
-                        "</b><span class='pull-right'>" +
-                        "<div class='onoffswitch'>" +
-                            "<input type='checkbox' name='onoffswitch' class='onoffswitch-checkbox' id="+
-                                object.id+
-                            ">" +
-                            "<label class='onoffswitch-label' for="+
-                                object.id+">" +
-                            "<span class='onoffswitch-inner'></span>" +
-                            "<span class='onoffswitch-switch'></span>" +
-                            "</label>" +
-                        "</div>" +
-                        "</span>" +
-                        "</li>");
-                    console.log(object.id + ' - ' + object.get('url'), object.get("timeSpent"));
+                    object.destroy();
                 }
-                drawChart(data);
 
             },
             error: function (error) {
@@ -55,8 +28,102 @@ function main() {
         });
     }
 
+
+    function findTopTenSitesNotBlocked() {
+
+        var Site = Parse.Object.extend("Site");
+        topTenQuery = new Parse.Query(Site);
+        topTenQuery.equalTo('user', username);
+        topTenQuery.doesNotMatchKeyInQuery('hostname', 'hostname', blockedSitesQuery);
+        topTenQuery.descending("timeSpent");
+
+        topTenQuery.find({
+            success: function (results) {
+                var data = [];
+                topTenNotBlocked = {};
+                for (var i = 0; i < results.length; i++) {
+
+                    var object = results[i];
+                    topTenNotBlocked[object.id] = object;
+                    console.log(object.id + ' - ' + object.get('hostname'), object.get("timeSpent"));
+
+                    var minDiff = object.get("timeSpent");
+                    minDiff = Math.round(minDiff / 600) / 100;
+                    data.push([object.get("title"), minDiff]);
+
+                    addSiteToList(object, false);
+                }
+                drawChart(data);
+                addListeners();
+
+
+            },
+            error: function (error) {
+                console.log("Error: " + error.code + " " + error.message);
+            }
+        });
+    }
+
+    function findBlockedSites() {
+
+
+        var BlockedSite = Parse.Object.extend("BlockedSite");
+        blockedSitesQuery = new Parse.Query(BlockedSite);
+        blockedSitesQuery.equalTo('user', username);
+
+        blockedSitesQuery.find({
+            success: function (results) {
+                $('#siteGroup').empty();
+                blockedSites = {};
+                for (var i = 0; i < results.length; i++) {
+
+                    var object = results[i];
+                    blockedSites[object.id] = object;
+                    console.log("blocked site" + object.id + ' - ' + object.get('hostname'));
+                    addSiteToList(object, true);
+                }
+
+                findTopTenSitesNotBlocked();
+            },
+            error: function (error) {
+                console.log("Error: " + error.code + " " + error.message);
+            }
+        });
+
+    }
+
+    function addSiteToList(object, blocked) {
+        var checked = "";
+        if (blocked){
+            checked = "checked";
+        }
+
+        $('#siteGroup').append(
+            "<li class='list-group-item clearfix' style='background:#2980b9; color:#FFFFFF'>" +
+            "<b>" + object.get("title") + "</b>" +
+                "<span class='pull-right'>" +
+                "<div class='onoffswitch'>" +
+                "<input type='checkbox' name='onoffswitch' class='onoffswitch-checkbox' "+ checked+
+                " id= " + object.id +">" +
+                "<label class='onoffswitch-label' for=" +
+                object.id + ">" +
+                "<span class='onoffswitch-inner'></span>" +
+                "<span class='onoffswitch-switch'></span>" +
+                "</label>" +
+                "</div>" +
+                "</span>" +
+                "</li>"
+            );
+
+
+    }
+
+
+
+
     function drawChart(data) {
-        $('#container').highcharts({
+
+        $('#highchartsContainer').highcharts({
             credits: {
                 enabled: false
             },
@@ -70,12 +137,14 @@ function main() {
                 type: 'column',
                 animation: {
                     duration: 10
+
                 },
                 backgroundColor: 'transparent'
             },
             title: {
                 style: {
-                    color: '#FFFFFF'
+                    color: '#FFFFFF',
+                    fontSize: '26px'
                 },
                 text: 'Time Spent on Sites'
             },
@@ -131,12 +200,67 @@ function main() {
         });
     }
 
-    window.addEventListener('focus', function () {
-        loadChart();
-    });
-    loadChart();
-}
+    function addListeners(){
+        $("input[type='checkbox']").click(function() {
+            var BlockedSite = Parse.Object.extend("BlockedSite");
+            if(this.checked){
+                var siteObject = topTenNotBlocked[this.id];
+                if(siteObject){
+                    query = new Parse.Query(BlockedSite);
+                    query.equalTo('user', username);
+                    query.equalTo('hostname', siteObject.get("hostname"));
+                    query.first({
+                        success: function (result) {
+                            if(!result){
+                                var site1 = new BlockedSite();
+                                site1.save({
+                                    user: siteObject.get('user'),
+                                    hostname: siteObject.get('hostname'),
+                                    title: siteObject.get('title')
+                                }).then(function (object) {
+                                    console.log("yay! it blocked",siteObject.get('hostname'));
 
+                                });
+                            }
+                            delete blockedSites[this.id];
+                        },
+                        error: function (error) {
+                            console.log("Error: " + error.code + " " + error.message);
+                        }
+                    });
+                }
+            } else {
+                var siteObject = blockedSites[this.id];
+                if(siteObject){
+                    query = new Parse.Query(BlockedSite);
+                    query.equalTo('user', username);
+                    query.equalTo('hostname', siteObject.get("hostname"));
+                    query.find({
+                        success: function (results) {
+                            for (var i = 0; i < results.length; i++) {
+
+                                var object = results[i];
+                                object.destroy();
+                                console.log("deleting"+ object.id+ object.get("hostname"));
+                            }
+                            delete blockedSites[this.id];
+                        },
+                        error: function (error) {
+                            console.log("Error: " + error.code + " " + error.message);
+                        }
+                    });
+
+                }
+            }
+
+        });
+    }
+
+    window.addEventListener('focus', function () {
+        findBlockedSites();
+    });
+    findBlockedSites();
+}
 
 
 

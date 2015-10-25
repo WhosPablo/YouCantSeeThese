@@ -103,9 +103,12 @@ function main() {
 
     function log(url, title, tab) {
         if (go) {
-            parser.href = url;
+            parser.href = title;
+
             var hostname = parser.hostname;
-            if (lastUrl !== url) {
+            var newTabTitle = "New Tab";
+            var pBGTitle = "Procrastination Be Gone";
+            if (lastUrl !== url && title != newTabTitle && title != pBGTitle && title != null) {
                 updateUrl(hostname, title)
             }
 
@@ -147,19 +150,26 @@ function main() {
         var query = new Parse.Query(Site);
         query.equalTo("user", username);
         query.equalTo("hostname", hostname);
-        query.first({
-            success: function (object) {
-                if (object) {
-                    console.log("Successfully retrieved " + object);
-                    var minDiff = Date.now() - lastTime;
-                    //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
+        query.find({
+            success: function (objects) {
+                if (objects) {
+                    for(var i =0; i< objects.length; i++){
+                        if(i=0){
+                            var object = objects[i];
+                            console.log("Successfully retrieved " + object);
+                            var minDiff = Date.now() - lastTime;
+                            //minDiff = Math.round(((minDiff % 86400000) % 3600000) / 60000);
 
-                    console.log(minDiff + object.get("timeSpent"), object.get("timeSpent"));
-                    object.set("timeSpent", minDiff + object.get("timeSpent"));
-                    object.set("title", title);
-                    object.save();
-                    lastUrl = hostname;
-                    lastTime = Date.now();
+                            console.log(minDiff + object.get("timeSpent"), object.get("timeSpent"));
+                            object.set("timeSpent", minDiff + object.get("timeSpent"));
+                            object.set("title", title);
+                            object.save();
+                            lastUrl = hostname;
+                            lastTime = Date.now();
+                        } else {
+                            objects[i].destroy();
+                        }
+                    }
                 } else {
                     var site1 = new Site();
                     site1.save({

@@ -2,9 +2,15 @@ Parse.initialize("RLrGIdVcBOjo80GwB5fi3xi3lCZ0Qk2RpO9fXiGr", "Lmu4rEdndfn1ihx2vD
 
 var currUser = Parse.User.current();
 
-main();
 
-function main() {
+$(function(){
+    findBlockedSites();
+    window.addEventListener('focus', function () {
+        findBlockedSites();
+    });
+});
+
+
     var username = currUser.get('username');
     var topTenQuery;
     var blockedSitesQuery;
@@ -178,8 +184,10 @@ function main() {
         }
 
         $('#siteGroup').append(
-            "<li class='list-group-item clearfix' style='background:#2980b9; color:#FFFFFF'>" +
-            "<b>" + object.get("title") + "</b>" +
+            "<li class='list-group-item clearfix' style='background:#2980b9; color:#FFFFFF'>"+
+            "<span>"+
+            "<b>" + object.get("title") + "</b>" + " &nbsp;  -  &nbsp; "+object.get("hostname")+
+            "</span>"+
             "<span class='pull-right'>" +
             "<div class='onoffswitch'>" +
             "<input type='checkbox' name='onoffswitch' class='onoffswitch-checkbox' "+ checked+
@@ -292,10 +300,8 @@ function main() {
 
     });
 
-    window.addEventListener('focus', function () {
-        findBlockedSites();
-    });
-}
+
+
 
 
 

@@ -19,7 +19,5 @@
     "storage",
     "activeTab",
     "https://ajax.googleapis.com/"
-  ],
-
-  "options_page": "options.html"
+  ]
 }

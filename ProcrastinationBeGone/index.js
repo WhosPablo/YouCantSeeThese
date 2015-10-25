@@ -70,13 +70,12 @@ function main() {
         var BlockedSite = Parse.Object.extend("BlockedSite");
         blockedSitesQuery = new Parse.Query(BlockedSite);
         blockedSitesQuery.equalTo('user', username);
-
         blockedSitesQuery.find({
             success: function (results) {
                 $('#siteGroup').empty();
                 blockedSites = {};
-                for (var i = 0; i < results.length; i++) {
 
+                for (var i = 0; i < results.length; i++) {
                     var object = results[i];
                     blockedSites[object.id] = object;
                     console.log("blocked site" + object.id + ' - ' + object.get('hostname'));
@@ -219,10 +218,13 @@ function main() {
                                     title: siteObject.get('title')
                                 }).then(function (object) {
                                     console.log("yay! it blocked",siteObject.get('hostname'));
+                                    delete topTenNotBlocked[siteObject.id];
+                                    blockedSites[siteObject.id]= siteObject;
+                                    //findBlockedSites();
 
                                 });
                             }
-                            delete blockedSites[this.id];
+                            delete blockedSites[siteObject.id];
                         },
                         error: function (error) {
                             console.log("Error: " + error.code + " " + error.message);
@@ -240,10 +242,17 @@ function main() {
                             for (var i = 0; i < results.length; i++) {
 
                                 var object = results[i];
-                                object.destroy();
-                                console.log("deleting"+ object.id+ object.get("hostname"));
+                                object.destroy().then( function (object){
+                                        //findBlockedSites();
+                                        console.log("deleting"+ object.id+ object.get("hostname"));
+                                        delete blockedSites[siteObject.id];
+                                        topTenNotBlocked[siteObject.id]= siteObject;
+                                    }
+                                );
+
+
                             }
-                            delete blockedSites[this.id];
+
                         },
                         error: function (error) {
                             console.log("Error: " + error.code + " " + error.message);

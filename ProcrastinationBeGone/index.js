@@ -1,7 +1,9 @@
 Parse.initialize("RLrGIdVcBOjo80GwB5fi3xi3lCZ0Qk2RpO9fXiGr", "Lmu4rEdndfn1ihx2vDNIISC9O1MrI9FRarzJGul3");
 
 var currUser = Parse.User.current();
+
 main();
+
 
 
 function main() {
@@ -11,22 +13,7 @@ function main() {
     var blockedSites;
     var topTenNotBlocked;
 
-    function clear() {
-        var query = new Parse.Query(Site);
-        query.equalTo("user", username);
-        query.find({
-            success: function (results) {
-                for (var i = 0; i < results.length; i++) {
-                    var object = results[i];
-                    object.destroy();
-                }
 
-            },
-            error: function (error) {
-                console.log("Error: " + error.code + " " + error.message);
-            }
-        });
-    }
 
 
     function findTopTenSitesNotBlocked() {
@@ -35,6 +22,7 @@ function main() {
         topTenQuery = new Parse.Query(Site);
         topTenQuery.equalTo('user', username);
         topTenQuery.doesNotMatchKeyInQuery('hostname', 'hostname', blockedSitesQuery);
+        topTenQuery.limit(10);
         topTenQuery.descending("timeSpent");
 
         topTenQuery.find({
@@ -45,7 +33,7 @@ function main() {
 
                     var object = results[i];
                     topTenNotBlocked[object.id] = object;
-                    console.log(object.id + ' - ' + object.get('hostname'), object.get("timeSpent"));
+                    //console.log(object.id + ' - ' + object.get('hostname'), object.get("timeSpent"));
 
                     var minDiff = object.get("timeSpent");
                     minDiff = Math.round(minDiff / 600) / 100;
@@ -121,6 +109,12 @@ function main() {
 
 
     function drawChart(data) {
+        console.log(data);
+        if(data.length == 0){
+            $("#noDataAlert").show()
+        } else {
+            $("#noDataAlert").hide()
+        }
 
         $('#highchartsContainer').highcharts({
             credits: {
@@ -264,6 +258,37 @@ function main() {
 
         });
     }
+
+    function clear(){
+        var Site = Parse.Object.extend("Site");
+        var query = new Parse.Query(Site);
+        query.equalTo('user', username);
+        query.find({
+            success: function (results) {
+                for (var i = 0; i < results.length; i++) {
+                    results[i].destroy();
+                }
+                findBlockedSites();
+            },
+            error: function (error) {
+                console.log("Error clearing: " + error.code + " " + error.message);
+            }
+        });
+    }
+    $(function() {
+        $("#clearStats").click(function () {
+            clear();
+
+
+        });
+        $("#refresh").click(function () {
+
+
+            findBlockedSites();
+
+        });
+
+    });
 
     window.addEventListener('focus', function () {
         findBlockedSites();

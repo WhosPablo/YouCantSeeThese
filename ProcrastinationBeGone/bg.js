@@ -103,8 +103,7 @@ function main() {
 
     function log(url, title, tab) {
         if (go) {
-            parser.href = title;
-
+            parser.href = url;
             var hostname = parser.hostname;
             var newTabTitle = "New Tab";
             var pBGTitle = "Procrastination Be Gone";

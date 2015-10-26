@@ -18,7 +18,7 @@ $(function(){
     var topTenNotBlocked;
 
 
-    function findTopTenSitesNotBlocked() {
+    function findTopTenSitesNotBlocked(shouldUpdateList) {
 
         var Site = Parse.Object.extend("Site");
         topTenQuery = new Parse.Query(Site);
@@ -41,7 +41,9 @@ $(function(){
                 }
 
                 drawChart(data);
-                updateList();
+                if(shouldUpdateList){
+                    updateList();
+                }
 
 
             },
@@ -64,7 +66,7 @@ $(function(){
                     blockedSites[object.id] = object;
                 }
 
-                findTopTenSitesNotBlocked();
+                findTopTenSitesNotBlocked(true);
             },
             error: function (error) {
                 console.log("Error: " + error.code + " " + error.message);
@@ -226,7 +228,7 @@ $(function(){
                                     console.log("yay! it blocked",siteObject.get('hostname'));
                                     delete topTenNotBlocked[siteObject.id];
                                     blockedSites[siteObject.id]= siteObject;
-
+                                    findTopTenSitesNotBlocked(false);
 
                                 });
                             }
@@ -252,6 +254,7 @@ $(function(){
                                         console.log("deleting"+ object.id+ object.get("hostname"));
                                         delete blockedSites[siteObject.id];
                                         topTenNotBlocked[siteObject.id]= siteObject;
+                                        findTopTenSitesNotBlocked(false);
                                     }
                                 );
 
